@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Navidad Mágica</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❄️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="overlay"></div>
+
+<div class="container">
+
+<div class="lights"></div>
+
+<h1 id="christmas-title">Felices Fiestas</h1>
+
+<div class="glass-panel">
+
+<div id="countdown">
+<div class="time-box">
+<span id="days">00</span>
+<p>
+DÍAS
+</p>
+</div>
+<div class="separator">
+:
+</div>
+<div class="time-box">
+<span id="hours">00</span>
+<p>
+HRS
+</p>
+</div>
+<div class="separator">
+:
+</div>
+<div class="time-box">
+<span id="minutes">00</span>
+<p>
+MIN
+</p>
+</div>
+<div class="separator">
+:
+</div>
+<div class="time-box">
+<span id="seconds">00</span>
+<p>
+SEG
+</p>
+</div>
+</div>
+
+<div class="message">
+Falta poco para <span class="christmas-text">Navidad</span>
+</div>
+
+<div class="controls">
+<button id="on-off-button" class="btn btn-primary">
+<span class="icon">⭕</span> Power
+</button>
+<button id="motion-button" class="btn btn-secondary">
+<span class="icon">✨</span> Modos
+</button>
+</div>
+  </div>
+        <footer class="app-footer">
+            <div class="ad-space">
+                <span class="ad-label">Patrocinado por:</span>
+                <span class="ad-content">Tu Marca Aquí</span>
+            </div>
+            
+            <div class="visitor-counter">
+                <span class="icon">👁️</span>
+                <span id="visit-count">0</span> visitas
+            </div>
+        </footer>
+
+    </div>
+
+</div>
+
+<audio id="Audio" preload="auto">
+<source src="We Wish You a Merry Christmas.mp3" type="audio/mp3">
+</audio>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

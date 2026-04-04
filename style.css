@@ -1,0 +1,653 @@
+/* --- RESET & BASICS --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    /* Recuperamos la imagen aquí */
+    background: url('img/navidad.jpg') no-repeat center center;
+    background-size: cover; /* Cubre toda la pantalla */
+    
+    /* Configuración estándar */
+    min-height: 100vh;
+    width: 100%;
+    height: ;
+    font-family: 'Montserrat', sans-serif;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+
+/* Capa oscura semitransparente para que las luces brillen más */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(10,10,30,0.4));
+    z-index: -1;
+    pointer-events: none; /* Permite clicks a través de él */
+}
+
+.container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    /* Esto empuja todo el contenido hacia abajo */
+    align-items: center;
+    padding-bottom: 90px;
+    /* Un pequeño margen antes del borde final */
+}
+
+/* --- LUCES (REDSEÑADAS) --- */
+.lights {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    position: absolute;
+    top: -20px;
+    /* Subimos un poco el inicio para ocultar el corte */
+    left: 0;
+    white-space: nowrap;
+    z-index: 10;
+    pointer-events: none;
+    /* Para que no estorben al clickear */
+    align-items: flex-start;
+    /* Alineación crucial para medir alturas desde arriba */
+}
+
+/* Cable más realista */
+.cordon, .cordon-top, .cordon-top2 {
+    display: inline-block;
+    width: 3px;
+    /* Un poco más grueso para que se vea bien */
+    background-color: #222;
+    margin-right: -11px;
+    /* Ajuste para conectar con el foco */
+    position: relative;
+    z-index: 1;
+}
+.cordon {
+    height: 60px;
+}
+.cordon-top {
+    height: 100px;
+}
+.cordon-top2 {
+    height: 80px;
+}
+
+/* Foco más estético (forma de lágrima) */
+.light {
+    display: inline-block;
+    width: 20px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    /* Apagado se ve como vidrio */
+    margin-right: 35px;
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+    margin-top: 55px;
+    /* Cable es 60px, así que 55px une perfecto */
+}
+
+/* Casquillo del foco */
+.light::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 2px;
+    width: 10px;
+    height: 10px;
+    background: #333;
+    border-radius: 2px;
+}
+
+/* Ajustes de altura para ritmo visual */
+.light-top {
+    margin-top: 95px;
+}
+.light-top2 {
+    margin-top: 75px;
+}
+
+
+/* --- PANEL DE CRISTAL (GLASSMORPHISM) --- */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.1);
+    /* Blanco muy transparente */
+    backdrop-filter: blur(15px);
+    /* Efecto borroso de fondo */
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    /* Borde sutil */
+    border-radius: 25px;
+    padding: 20px 40px;
+    /* Un poco más compacto */
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    margin-bottom: 10px;
+    z-index: 100;
+    /* Siempre encima */
+    width: 90%;
+    max-width: 500px;
+}
+
+/* --- CONTADOR MODERNO --- */
+#countdown {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.time-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.time-box span {
+    font-size: 3.5rem;
+    font-weight: 200;
+    /* Letra delgada elegante */
+    color: #fff;
+    line-height: 1;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+.time-box p {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 2px;
+    margin-top: 5px;
+}
+
+.separator {
+    font-size: 2rem;
+    color: rgba(255,255,255,0.3);
+    margin-top: -20px;
+}
+
+.message {
+    font-family: 'Montserrat', sans-serif;
+    color: #ddd;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    margin-bottom: 25px;
+}
+
+.christmas-text {
+    font-family: 'Great Vibes', cursive;
+    color: #ff4d4d;
+    /* Rojo navideño */
+    font-size: 2.5rem;
+    margin-left: 5px;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+}
+
+/* --- BOTONES PREMIUM --- */
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.btn {
+    border: none;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    color: white;
+    box-shadow: 0 5px 15px rgba(255, 75, 43, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+    color: white;
+    box-shadow: 0 5px 15px rgba(56, 239, 125, 0.4);
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.1);
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+#christmas-title {
+    position: absolute;
+    top: 45%;
+    /* Posición vertical */
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    font-family: 'Great Vibes', cursive;
+    /* Tu fuente elegante */
+    font-size: 5rem;
+    /* Tamaño grande */
+    color: #fff;
+    /* Blanco puro */
+
+    /* El truco del brillo Neón Cian */
+    text-shadow:
+    0 0 10px #00e5ff,
+    0 0 20px #00e5ff,
+    0 0 40px #00e5ff;
+
+    z-index: 5;
+    white-space: nowrap;
+    text-align: center;
+
+    /* Animación de entrada suave */
+    animation: textGlow 3s ease-in-out infinite alternate, popIn 1s ease-out;
+
+    display: none;
+    /* Oculto al inicio (el JS lo mostrará) */
+}
+
+/* Animación de palpitación suave */
+@keyframes textGlow {
+    from {
+        text-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff;
+    }
+    to {
+        text-shadow: 0 0 20px #00e5ff, 0 0 40px #00e5ff, 0 0 60px #00e5ff;
+    }
+}
+
+#christmas-title.visible {
+    display: block;
+}
+
+/* Ajuste para Móviles
+/*@media (max-width: 768px) {
+    #christmas-title {*/
+        /*font-size: 3.5rem;
+         Más pequeño en celular */
+        /*width: 100%;
+    }*/
+/*} */
+
+
+@keyframes popIn {
+    from {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+/* --- NIEVE --- */
+i {
+    position: absolute;
+    background: radial-gradient(white, rgba(255,255,255,0.8));
+    border-radius: 50%;
+    top: -10px;
+    pointer-events: none;
+    /* Click through */
+    animation: nieve linear infinite;
+    z-index: 20;
+}
+
+@keyframes nieve {
+    0% {
+        top: -10px;
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        top: 100vh;
+        opacity: 0;
+        transform: translateX(50px);
+    }
+}
+
+/* --- ANIMACIONES DE LUCES (Las tuyas, ajustadas para no romper) --- */
+@keyframes flash {
+    0%, 50%, 100% {
+        opacity: 1;
+    }
+    25%, 75% {
+        opacity: 0.2;
+    }
+}
+@keyframes fade {
+    0%, 100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+@keyframes persecucion {
+    0% {
+        opacity: 0.1;
+    }
+    20% {
+        opacity: 1;
+    }
+    40% {
+        opacity: 0.1;
+    }
+    100% {
+        opacity: 0.1;
+    }
+}
+@keyframes luces-alternadas {
+    0%, 49% {
+        opacity: 1;
+    }
+    50%, 100% {
+        opacity: 0.2;
+    }
+}
+
+/* 5. Latido (Doble pulso rítmico) */
+@keyframes latido {
+    0% {
+        opacity: 0.2;
+        transform: scale(0.95);
+    }
+    14% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    28% {
+        opacity: 0.2;
+        transform: scale(0.95);
+    }
+    42% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    70%, 100% {
+        opacity: 0.2;
+        transform: scale(0.95);
+    }
+}
+
+/* 6. Explosión (Brillo súbito y desvanecimiento lento) */
+@keyframes explosion {
+    0% {
+        opacity: 1;
+        filter: brightness(2);
+    }
+
+    /* Destello fuerte */
+    10% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.2;
+    }
+}
+
+/* Nota: Para el "Scanner" reciclaremos la animación 'persecucion'
+   pero cambiaremos la dirección en JS */
+
+
+/* --- RESPONSIVIDAD MAESTRA --- */
+
+/* 1. Laptops y Tabletas en Horizontal (max-width: 1024px) */
+@media (max-width: 1024px) {
+    .container {
+        padding-bottom: 100px;
+    }
+
+    #christmas-title {
+        font-size: 4.5rem;
+        /* Un poco más pequeño que en escritorio */
+    }
+
+    .glass-panel {
+        max-width: 70%;
+        padding: 20px 30px;
+    }
+}
+
+/* 2. Tabletas Verticales y Móviles Grandes (max-width: 768px) */
+@media (max-width: 768px) {
+    
+    .container{
+        padding-bottom: 110px;
+    }
+    
+    /* Ajustamos las luces para que no se vean tan separadas */
+    .light {
+        width: 15px;
+        height: 30px;
+        margin-right: 20px;
+        /* Reducimos espacio entre focos */
+        margin-top: 55px;
+        /* Ajuste fino para conectar con el cable */
+    }
+
+    .cordon {
+        height: 60px;
+        margin-right: -8px;
+    }
+    .cordon-top {
+        height: 90px;
+        margin-right: -8px;
+    }
+    .cordon-top2 {
+        height: 75px;
+        margin-right: -8px;
+    }
+
+    /* Ajustes alturas específicas para tableta */
+    .light.light-top {
+        margin-top: 85px;
+    }
+    .light.light-top2 {
+        margin-top: 70px;
+    }
+
+    #christmas-title {
+        font-size: 3.5rem;
+        width: 90%;
+        white-space: normal;
+        /* Permite que el texto baje de línea si es necesario */
+        line-height: 1.2;
+    }
+
+    .glass-panel {
+        max-width: 85%;
+        margin-bottom: 20px;
+    }
+
+    .time-box span {
+        font-size: 2.5rem;
+    }
+    .message {
+        font-size: 1rem;
+    }
+}
+
+/* 3. Móviles Pequeños (max-width: 480px) */
+@media (max-width: 480px) {
+    .container {
+        /* CAMBIO AQUÍ: Aseguramos espacio extra en móvil */
+        padding-bottom: 110px; 
+    }
+    
+    /* Luces más compactas */
+    .lights {
+        top: -10px;
+    }
+    .light {
+        margin-right: 15px;
+    }
+
+    /* Más juntas */
+
+    #christmas-title {
+        font-size: 2.8rem;
+        /* Tamaño seguro para pantallas angostas */
+        top: 40%;
+        /* Subimos un poco el título para dar espacio al panel */
+    }
+
+    /* Panel compacto */
+    .glass-panel {
+        width: 95%;
+        /* Ocupa casi todo el ancho */
+        padding: 15px 10px;
+        margin-bottom: 10px;
+        border-radius: 20px;
+    }
+
+    /* Contador pequeño */
+    .time-box span {
+        font-size: 1.8rem;
+    }
+    .time-box p {
+        font-size: 0.6rem;
+    }
+    .separator {
+        font-size: 1.5rem;
+        margin-top: -10px;
+    }
+
+    .christmas-text {
+        font-size: 1.8rem;
+    }
+
+    /* Botones amigables al dedo */
+    .controls {
+        gap: 10px;
+    }
+    .btn {
+        padding: 10px 15px;
+        font-size: 0.8rem;
+        width: 100%;
+        /* Botones expandidos para fácil click */
+        justify-content: center;
+    }
+}
+
+/* Ajuste para pantallas muy cortas (Landscape en móvil) */
+@media (max-height: 500px) {
+    .container {
+        justify-content: center;
+    }
+    .glass-panel {
+        transform: scale(0.8);
+        /* Hacemos todo el panel más pequeño */
+        margin-bottom: 0;
+    }
+    #christmas-title {
+        display: none !important;
+    }
+
+    /* Ocultamos título para ver el contador */
+    .lights {
+        display: none;
+    }
+
+    /* Ocultamos luces si estorban mucho en horizontal */
+}
+
+/* --- FOOTER (Publicidad y Contador) --- */
+.app-footer {
+    width: 100%;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.6); /* Fondo oscuro semitransparente */
+    backdrop-filter: blur(5px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    position: absolute; /* Lo pegamos al fondo del contenedor padre */
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Sección de Publicidad */
+.ad-space {
+    display: flex;
+    flex-direction: column;
+}
+
+.ad-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.ad-content {
+    font-weight: 600;
+    color: #00e5ff; /* Usamos tu color Cian Neón */
+    letter-spacing: 0.5px;
+}
+
+/* Sección Contador */
+.visitor-counter {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+#visit-count {
+    color: #fff;
+    font-weight: bold;
+}
+
+/* Ajuste móvil para que el panel no choque con el footer */
+@media (max-width: 480px) {
+    .container {
+        padding-bottom: 120px; /* Damos espacio extra abajo */
+    }
+    
+    .app-footer {
+        padding: 8px 15px;
+        flex-direction: row; /* Mantener en línea si cabe */
+        gap: 10px;
+    }
+    
+    /* Si el texto es muy largo, ajustamos fuentes */
+    .ad-label { font-size: 0.5rem; }
+    .ad-content { font-size: 0.7rem; }
+    .visitor-counter { font-size: 0.7rem; }
+}
