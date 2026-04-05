@@ -500,39 +500,202 @@ body {
     min-width: auto;
     box-shadow: none;
 }
-/* Botones cuadrados de icono (compartir, notificar) */
-.btn-icon {
-    min-width: 40px;
-    min-height: 40px;
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    border-radius: 50%;
-    font-size: 1.1rem;
-    flex-shrink: 0;
-}
 .btn:hover  { transform: translateY(-2px); filter: brightness(1.12); }
 .btn:active { transform: translateY(1px);  filter: brightness(0.93); }
 
 /* ═══════════════════════════════════════════════════════════════
-   CONTROLES SECUNDARIOS
+   CONTROLES SECUNDARIOS — grid 3 columnas
 ═══════════════════════════════════════════════════════════════ */
 .extra-controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
     gap: 8px;
     margin-top: 10px;
-    flex-wrap: wrap;
+    align-items: stretch;
 }
 
-/* Estado activo del botón de notificación */
+/* ── Botón de Nieve ─────────────────────────────────────────── */
+.btn-snow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 14px;
+    color: rgba(255,255,255,0.8);
+    font-family: 'Montserrat', sans-serif;
+    cursor: pointer;
+    min-height: 50px;
+    overflow: hidden;           /* ← evita el desbordamiento de texto */
+    transition: background 0.2s, transform 0.18s;
+    text-align: left;
+}
+.btn-snow:hover  { background: rgba(255,255,255,0.14); transform: scale(1.02); }
+.btn-snow:active { transform: scale(0.97); }
+
+.snow-btn-icon {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.snow-btn-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-width: 0;               /* ← crucial para que el overflow funcione */
+    overflow: hidden;
+}
+
+.snow-btn-text > span:first-child {
+    font-size: 0.58rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.5);
+    white-space: nowrap;
+}
+
+.snow-level-badge {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: block;
+}
+
+/* ── Botones de acción squircle (Compartir / Notificar) ──────── */
+.btn-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 54px;
+    min-width: 54px;
+    min-height: 50px;
+    padding: 8px 4px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.78);
+    cursor: pointer;
+    transition: background 0.22s, transform 0.18s, border-color 0.25s, box-shadow 0.25s;
+    flex-shrink: 0;
+    font-family: 'Montserrat', sans-serif;
+}
+.btn-action > span:first-child {
+    font-size: 1.3rem;
+    line-height: 1;
+}
+.btn-action small {
+    font-size: 0.52rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1;
+    white-space: nowrap;
+}
+.btn-action:hover  { background: rgba(255,255,255,0.16); transform: scale(1.07); }
+.btn-action:active { transform: scale(0.94); }
+
+/* Notificación ACTIVA: brillo estático contenido (sin pulse que se desborde) */
 #notify-button.notif-active {
     border-color: var(--neon);
+    background: rgba(0, 0, 0, 0.22);
+    box-shadow: 0 0 0 2px var(--neon-glow), inset 0 0 10px var(--neon-glow);
     color: var(--neon);
-    box-shadow: 0 0 10px var(--neon-glow);
-    animation: pulse 1.5s ease-in-out infinite alternate;
+    /* SIN animation:pulse — se desbordaba al botón adyacente */
 }
+#notify-button.notif-active small {
+    color: var(--neon);
+    opacity: 0.9;
+}
+/* Punto verde parpadeante dentro del botón cuando activo */
+#notify-button.notif-active > span:first-child::after {
+    content: '●';
+    font-size: 0.4rem;
+    color: #4cff72;
+    vertical-align: super;
+    margin-left: 1px;
+    animation: dotPulse 1.4s ease-in-out infinite alternate;
+}
+@keyframes dotPulse {
+    from { opacity: 0.4; }
+    to   { opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BARRA INFERIOR — temperatura + selector de idioma
+═══════════════════════════════════════════════════════════════ */
+.bottom-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+/* Widget de temperatura */
+.weather-widget {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 11px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 20px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+.weather-icon { font-size: 0.9rem; flex-shrink: 0; }
+.weather-temp {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.weather-desc {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: capitalize;
+}
+
+/* Selector de idioma */
+.lang-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 11px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 20px;
+    color: rgba(255,255,255,0.65);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.18s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.lang-btn:hover  { background: rgba(255,255,255,0.15); color: #fff; transform: scale(1.04); }
+.lang-btn:active { transform: scale(0.97); }
 
 /* ═══════════════════════════════════════════════════════════════
    MENSAJE DE LLEGADA
@@ -685,6 +848,9 @@ body {
     .btn { padding:11px 16px; flex:1; min-width:0; }
     .theme-btn { width:36px; height:36px; font-size:1.1rem; }
     .song-pill { font-size:0.65rem; padding:5px 10px; }
+    .btn-action { width:48px; min-width:48px; }
+    .btn-action small { font-size: 0.48rem; }
+    .weather-desc { display: none; } /* Solo temp + icon en mobile pequeño */
 }
 
 @media (max-width: 360px) {
@@ -707,4 +873,5 @@ body {
     .lights { display:none; }
     .theme-selector { margin-bottom:7px; }
     .song-selector { display:none; } /* Ocultamos en landscape para ahorrar espacio */
+    .bottom-bar    { display:none; }
 }

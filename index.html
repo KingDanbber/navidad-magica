@@ -114,17 +114,43 @@
             </button>
         </div>
 
-        <!-- ── Controles secundarios ─────────────────────────── -->
+        <!-- ── Controles secundarios — grid 3 columnas ──────── -->
         <div class="extra-controls">
-            <button id="snow-button" class="btn btn-ghost">
-                🌨️&nbsp;Nieve:&nbsp;<span id="snow-label">Normal</span>
+
+            <!-- Nieve: toma el espacio disponible, texto no desborda -->
+            <button id="snow-button" class="btn-snow" aria-label="Cambiar intensidad de nieve">
+                <span class="snow-btn-icon" aria-hidden="true">🌨️</span>
+                <span class="snow-btn-text">
+                    <span data-i18n="snow">Nieve</span>
+                    <span class="snow-level-badge" id="snow-label">Normal</span>
+                </span>
             </button>
-            <button id="share-button" class="btn btn-ghost btn-icon" aria-label="Compartir">
-                🔗
+
+            <!-- Compartir: squircle con icono + etiqueta -->
+            <button id="share-button" class="btn-action" aria-label="Compartir página">
+                <span aria-hidden="true">🔗</span>
+                <small data-i18n="share">Compartir</small>
             </button>
-            <button id="notify-button" class="btn btn-ghost btn-icon" aria-label="Activar notificación de Navidad"
-                    title="Notificación de Navidad">
-                🔔
+
+            <!-- Notificación: squircle con icono + etiqueta -->
+            <button id="notify-button" class="btn-action"
+                    aria-label="Activar notificación de Navidad"
+                    title="Notificación el 25 de diciembre">
+                <span aria-hidden="true">🔔</span>
+                <small data-i18n="notify">Avisar</small>
+            </button>
+
+        </div>
+
+        <!-- ── Temperatura + idioma ───────────────────────────── -->
+        <div class="bottom-bar">
+            <div class="weather-widget" id="weather-widget" aria-live="polite">
+                <span class="weather-icon" id="weather-icon" aria-hidden="true">🌡️</span>
+                <span class="weather-temp" id="weather-temp">--°</span>
+                <span class="weather-desc" id="weather-desc" data-i18n="loading">Cargando...</span>
+            </div>
+            <button id="lang-toggle" class="lang-btn" aria-label="Cambiar idioma / Switch language">
+                🌐 <span id="lang-label">ES</span>
             </button>
         </div>
 

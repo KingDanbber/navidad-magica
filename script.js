@@ -115,6 +115,9 @@ let contador       = 1;
 let currentTheme   = 'clasico';
 let currentSong    = 0;
 let arrivalShown   = false;
+// Idioma — detectado aquí para que lo usen los módulos de nieve y clima
+let currentLang    = localStorage.getItem('xmas_lang')
+    || (navigator.language?.startsWith('en') ? 'en' : 'es');
 
 /* ═══════════════════════════════════════════════════════════════
    HELPER: colores del tema desde CSS vars
@@ -545,21 +548,23 @@ class Snowflake {
     reset(placeAnywhere = false) {
         this.x      = Math.random() * snowCanvas.width;
         this.y      = placeAnywhere ? Math.random() * snowCanvas.height : -8;
-        this.radius = Math.random() * 3.5 + 0.8;
-        this.speed  = Math.random() * 1.1 + 0.35;
-        this.wind   = (Math.random() - 0.5) * 0.45;
-        this.alpha  = Math.random() * 0.55 + 0.45;
+        this.radius = Math.random() * 3.2 + 0.8;
+        /* SPEED FIX: antes 0.35-1.45px/frame → se veía en cámara lenta.
+           Ahora 1.4-4.2px/frame @ 60fps = caída natural y fluida.
+           Con delta-time la velocidad es igual en 60/90/120Hz. */
+        this.speed  = Math.random() * 2.8 + 1.4;
+        this.wind   = (Math.random() - 0.5) * 0.5;
+        this.alpha  = Math.random() * 0.5 + 0.5;
     }
-    update() {
-        this.y += this.speed;
-        this.x += this.wind;
-        if (this.y > snowCanvas.height + 10 || this.x < -10 || this.x > snowCanvas.width + 10)
+    update(dt = 1) {
+        this.y += this.speed * dt;
+        this.x += this.wind  * dt;
+        if (this.y > snowCanvas.height + 10 || this.x < -12 || this.x > snowCanvas.width + 12)
             this.reset();
     }
     draw() {
         const s = this.radius * 2;
         snowCtx.globalAlpha = this.alpha;
-        // drawImage es ~5× más rápido que arc() en canvas
         snowCtx.drawImage(snowSprite, this.x - this.radius, this.y - this.radius, s, s);
     }
 }
@@ -567,6 +572,7 @@ class Snowflake {
 const SNOW_COUNTS = [0, 60, 150, 340]; // apagada, ligera, normal, intensa
 let snowLevelIndex = 2;
 let flakes = [];
+let snowLastTime = 0; // Para delta-time
 
 function initSnow(count) {
     flakes = Array.from({ length: count }, (_, i) => new Snowflake(i < count * 0.7));
@@ -574,29 +580,106 @@ function initSnow(count) {
 
 initSnow(SNOW_COUNTS[snowLevelIndex]);
 
-let snowAnimId = null;
-let snowRunning = true;
+/* ═══════════════════════════════════════════════════════════════
+   ESTRELLAS FUGACES — renderizadas en el mismo snow canvas
+═══════════════════════════════════════════════════════════════ */
+class ShootingStar {
+    constructor() { this.reset(true); }
 
-function animateSnow() {
-    if (!snowRunning) return;
-    snowCtx.clearRect(0, 0, snowCanvas.width, snowCanvas.height);
-    flakes.forEach(f => { f.update(); f.draw(); });
-    snowCtx.globalAlpha = 1;
-    snowAnimId = requestAnimationFrame(animateSnow);
+    reset(initialDelay = false) {
+        this.x        = Math.random() * snowCanvas.width  * 0.65;
+        this.y        = Math.random() * snowCanvas.height * 0.28;
+        this.speed    = Math.random() * 7 + 6;
+        this.length   = Math.random() * 100 + 70;
+        this.angle    = Math.PI / 4 + (Math.random() - 0.5) * 0.25;
+        this.vx       = Math.cos(this.angle) * this.speed;
+        this.vy       = Math.sin(this.angle) * this.speed;
+        this.alpha    = 0;
+        this.traveled = 0;
+        this.waitFrames = initialDelay
+            ? Math.floor(Math.random() * 500)
+            : Math.floor(Math.random() * 360 + 100);
+    }
+
+    update(dt = 1) {
+        if (this.waitFrames > 0) { this.waitFrames -= dt; return; }
+        this.x        += this.vx * dt;
+        this.y        += this.vy * dt;
+        this.traveled += this.speed * dt;
+        const fadeLen  = this.length * 0.3;
+        this.alpha = this.traveled < fadeLen
+            ? this.traveled / fadeLen
+            : this.traveled > this.length - fadeLen
+                ? Math.max(0, (this.length - this.traveled) / fadeLen)
+                : 1;
+        if (this.traveled >= this.length ||
+            this.x > snowCanvas.width + 20 ||
+            this.y > snowCanvas.height + 20) {
+            this.reset();
+        }
+    }
+
+    draw() {
+        if (this.waitFrames > 0 || this.traveled === 0) return;
+        const tail  = Math.min((this.length / this.speed) * 0.28, 14);
+        const tailX = this.x - this.vx * tail;
+        const tailY = this.y - this.vy * tail;
+
+        const gr = snowCtx.createLinearGradient(tailX, tailY, this.x, this.y);
+        gr.addColorStop(0, 'rgba(255,255,255,0)');
+        gr.addColorStop(1, `rgba(255,255,255,${this.alpha * 0.88})`);
+
+        snowCtx.save();
+        snowCtx.globalAlpha = this.alpha;
+        snowCtx.strokeStyle = gr;
+        snowCtx.lineWidth   = 1.7;
+        snowCtx.lineCap     = 'round';
+        snowCtx.beginPath();
+        snowCtx.moveTo(tailX, tailY);
+        snowCtx.lineTo(this.x, this.y);
+        snowCtx.stroke();
+        snowCtx.globalAlpha = this.alpha;
+        snowCtx.fillStyle   = '#fff';
+        snowCtx.beginPath();
+        snowCtx.arc(this.x, this.y, 1.8, 0, Math.PI * 2);
+        snowCtx.fill();
+        snowCtx.restore();
+    }
 }
 
-animateSnow();
+const shootingStars = Array.from({ length: 4 }, () => new ShootingStar());
+
+/* Bucle de animación con delta-time — velocidad igual en 60/90/120 Hz */
+function animateSnow(timestamp) {
+    const dt = snowLastTime
+        ? Math.min((timestamp - snowLastTime) / 16.667, 3.5)
+        : 1;
+    snowLastTime = timestamp;
+
+    snowCtx.clearRect(0, 0, snowCanvas.width, snowCanvas.height);
+
+    // Estrellas fugaces primero (quedan detrás de la nieve)
+    shootingStars.forEach(s => { s.update(dt); s.draw(); });
+
+    // Nieve
+    flakes.forEach(f => { f.update(dt); f.draw(); });
+
+    snowCtx.globalAlpha = 1;
+    requestAnimationFrame(animateSnow);
+}
+
+animateSnow(0);
 
 /* Niveles de nieve */
-const SNOW_LABELS = ['Apagada','Ligera','Normal','Intensa'];
+const SNOW_LABELS_ES = ['Apagada', 'Ligera', 'Normal', 'Intensa'];
+const SNOW_LABELS_EN = ['Off',     'Light',  'Normal', 'Heavy'];
 
 function applySnowLevel(index) {
-    snowLabel.textContent = SNOW_LABELS[index];
+    const label = currentLang === 'en' ? SNOW_LABELS_EN[index] : SNOW_LABELS_ES[index];
+    snowLabel.textContent = label;
     initSnow(SNOW_COUNTS[index]);
-    // Si se apaga, limpiar canvas una vez más
-    if (SNOW_COUNTS[index] === 0) {
+    if (SNOW_COUNTS[index] === 0)
         snowCtx.clearRect(0, 0, snowCanvas.width, snowCanvas.height);
-    }
 }
 
 snowButton.addEventListener('click', () => {
@@ -774,3 +857,188 @@ function createStarfield() {
 }
 
 createStarfield();
+
+/* ═══════════════════════════════════════════════════════════════
+   TEMPERATURA ACTUAL — wttr.in (sin API key, CORS libre)
+═══════════════════════════════════════════════════════════════ */
+const WEATHER_ICONS = {
+    'clear': '☀️', 'sunny': '☀️', 'despejado': '☀️',
+    'cloud': '☁️', 'nublado': '☁️', 'overcast': '☁️',
+    'partly': '⛅', 'parcialmente': '⛅',
+    'rain': '🌧️', 'lluvia': '🌧️', 'drizzle': '🌦️',
+    'snow': '🌨️', 'nieve': '🌨️',
+    'thunder': '⛈️', 'tormenta': '⛈️',
+    'fog': '🌫️', 'niebla': '🌫️', 'mist': '🌫️',
+    'wind': '💨', 'viento': '💨',
+};
+
+function getWeatherEmoji(desc) {
+    const d = desc.toLowerCase();
+    for (const [key, icon] of Object.entries(WEATHER_ICONS)) {
+        if (d.includes(key)) return icon;
+    }
+    return '🌡️';
+}
+
+async function fetchWeather() {
+    const tempEl = document.getElementById('weather-temp');
+    const descEl = document.getElementById('weather-desc');
+    const iconEl = document.getElementById('weather-icon');
+    if (!tempEl) return;
+
+    try {
+        /* wttr.in devuelve JSON basado en IP automáticamente.
+           format=j1 → JSON con temperatura y descripción.
+           Timeout de 5s para no bloquear si hay latencia. */
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 5000);
+
+        const res  = await fetch('https://wttr.in/?format=j1', { signal: controller.signal });
+        clearTimeout(timer);
+        if (!res.ok) throw new Error('wttr error');
+
+        const data  = await res.json();
+        const curr  = data.current_condition[0];
+        const tempC = curr.temp_C;
+        const desc  = currentLang === 'en'
+            ? curr.weatherDesc[0].value
+            : (curr.lang_es?.[0]?.value || curr.weatherDesc[0].value);
+
+        tempEl.textContent = `${tempC}°C`;
+        descEl.textContent = desc;
+        iconEl.textContent = getWeatherEmoji(desc);
+    } catch (e) {
+        // Falla silenciosa — no rompe la app
+        const descEl2 = document.getElementById('weather-desc');
+        if (descEl2) descEl2.textContent = '--';
+    }
+}
+
+// Carga el clima después de 1.5s (no bloquea el render inicial)
+setTimeout(fetchWeather, 1500);
+
+/* ═══════════════════════════════════════════════════════════════
+   TRADUCCIÓN AUTOMÁTICA — ES / EN
+   Detecta navigator.language al cargar, permite toggle manual
+═══════════════════════════════════════════════════════════════ */
+const I18N = {
+    es: {
+        title:       'Felices Fiestas',
+        message:     'Falta poco para',
+        days:        'DÍAS',
+        hrs:         'HRS',
+        min:         'MIN',
+        seg:         'SEG',
+        power:       'Power',
+        modes:       'Modos',
+        snow:        'Nieve',
+        share:       'Compartir',
+        notify:      'Avisar',
+        loading:     'Cargando...',
+        toastCopied: '🔗 Enlace copiado al portapapeles',
+        toastURL:    '📋 ',
+        notifOn:     '🔔 ¡Listo! Te avisaremos el 25 de diciembre 🎄',
+        notifOff:    '🔕 Notificación desactivada',
+        notifDenied: '🚫 Permiso bloqueado. Actívalo en ajustes del navegador.',
+        notifNo:     '⚠️ Tu navegador no soporta notificaciones',
+        arrivalTitle: '¡Feliz Navidad!',
+        arrivalSub:   'Que esta noche sea llena de magia, amor y alegría ✨',
+        arrivalBtn:   '🎊 ¡Celebrar!',
+        snowLevels:  ['Apagada', 'Ligera', 'Normal', 'Intensa'],
+    },
+    en: {
+        title:       'Happy Holidays',
+        message:     'Until',
+        days:        'DAYS',
+        hrs:         'HRS',
+        min:         'MIN',
+        seg:         'SEC',
+        power:       'Power',
+        modes:       'Modes',
+        snow:        'Snow',
+        share:       'Share',
+        notify:      'Notify',
+        loading:     'Loading...',
+        toastCopied: '🔗 Link copied to clipboard',
+        toastURL:    '📋 ',
+        notifOn:     '🔔 Done! We\'ll notify you on December 25th 🎄',
+        notifOff:    '🔕 Notification disabled',
+        notifDenied: '🚫 Permission blocked. Enable it in browser settings.',
+        notifNo:     '⚠️ Your browser doesn\'t support notifications',
+        arrivalTitle: 'Merry Christmas!',
+        arrivalSub:   'May this night be filled with magic, love and joy ✨',
+        arrivalBtn:   '🎊 Celebrate!',
+        snowLevels:  ['Off', 'Light', 'Normal', 'Heavy'],
+    },
+};
+
+// Idioma ya declarado en estado global arriba
+function applyTranslation(lang) {
+    const t = I18N[lang] || I18N.es;
+    currentLang = lang;
+    localStorage.setItem('xmas_lang', lang);
+
+    // Actualizar label del toggle
+    const langLabel = document.getElementById('lang-label');
+    if (langLabel) langLabel.textContent = lang.toUpperCase();
+
+    // Título central
+    const titleEl = document.getElementById('christmas-title');
+    if (titleEl) titleEl.textContent = t.title;
+
+    // Mensaje "Falta poco para"
+    const msgEl = document.querySelector('.message');
+    if (msgEl) {
+        const xmasSpan = msgEl.querySelector('.christmas-text');
+        msgEl.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = `${t.message} `; });
+        if (!xmasSpan && lang === 'en') {
+            msgEl.insertAdjacentHTML('beforeend', ' <span class="christmas-text">Christmas</span>');
+        } else if (xmasSpan && lang === 'en') {
+            xmasSpan.textContent = 'Christmas';
+        } else if (xmasSpan && lang === 'es') {
+            xmasSpan.textContent = 'Navidad';
+        }
+    }
+
+    // Unidades del countdown
+    const labels = ['days', 'hours', 'minutes', 'seconds'];
+    const keys   = ['days', 'hrs', 'min', 'seg'];
+    labels.forEach((id, i) => {
+        const box = document.getElementById(id)?.parentElement?.querySelector('p');
+        if (box) box.textContent = t[keys[i]];
+    });
+
+    // Botones principales
+    const onOff  = document.getElementById('on-off-button');
+    const motion = document.getElementById('motion-button');
+    if (onOff)  onOff.innerHTML  = `<span class="icon" aria-hidden="true">⭕</span> ${t.power}`;
+    if (motion) motion.innerHTML = `<span class="icon" aria-hidden="true">✨</span> ${t.modes}`;
+
+    // Extra controls — data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (t[key] !== undefined) el.textContent = t[key];
+    });
+
+    // Mensaje de llegada
+    const arrTitle = document.querySelector('.arrival-title');
+    const arrSub   = document.querySelector('.arrival-subtitle');
+    const arrBtn   = document.getElementById('close-arrival');
+    if (arrTitle) arrTitle.textContent = t.arrivalTitle;
+    if (arrSub)   arrSub.textContent   = t.arrivalSub;
+    if (arrBtn)   arrBtn.textContent   = t.arrivalBtn;
+
+    // Nivel de nieve actual
+    applySnowLevel(snowLevelIndex);
+
+    // Refrescar descripción del clima en nuevo idioma
+    fetchWeather();
+}
+
+// Aplicar idioma al cargar
+applyTranslation(currentLang);
+
+// Toggle de idioma
+document.getElementById('lang-toggle')?.addEventListener('click', () => {
+    applyTranslation(currentLang === 'es' ? 'en' : 'es');
+});
