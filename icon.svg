@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fondo redondeado oscuro -->
+  <rect width="512" height="512" rx="100" fill="#071a07"/>
+
+  <!-- Árbol de Navidad — triángulos -->
+  <polygon points="256,60 170,200 342,200" fill="#1a7a1a"/>
+  <polygon points="256,130 155,290 357,290" fill="#22a022"/>
+  <polygon points="256,200 140,390 372,390" fill="#1a7a1a"/>
+
+  <!-- Tronco -->
+  <rect x="226" y="385" width="60" height="60" rx="6" fill="#5c3317"/>
+
+  <!-- Estrella en la punta -->
+  <polygon points="256,35 263,58 287,58 268,72 275,95 256,81 237,95 244,72 225,58 249,58"
+           fill="#ffd700" opacity="0.95"/>
+
+  <!-- Bolitas -->
+  <circle cx="210" cy="230" r="14" fill="#ff4444" opacity="0.9"/>
+  <circle cx="302" cy="245" r="14" fill="#00e5ff" opacity="0.9"/>
+  <circle cx="185" cy="340" r="14" fill="#ffd700" opacity="0.9"/>
+  <circle cx="327" cy="325" r="14" fill="#ff4444" opacity="0.9"/>
+  <circle cx="255" cy="355" r="12" fill="#00e5ff" opacity="0.9"/>
+
+  <!-- Brillo neón alrededor del árbol (sutil) -->
+  <polygon points="256,60 170,200 342,200" fill="none"
+           stroke="#00e5ff" stroke-width="2" opacity="0.3"/>
+</svg>

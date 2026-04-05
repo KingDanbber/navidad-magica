@@ -1,0 +1,36 @@
+{
+  "name": "Navidad Mágica",
+  "short_name": "Navidad ❄️",
+  "description": "Cuenta regresiva mágica para Navidad con luces, nieve y música",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#071a07",
+  "theme_color": "#00e5ff",
+  "orientation": "portrait-primary",
+  "lang": "es-MX",
+  "categories": ["entertainment", "lifestyle"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Ver countdown",
+      "short_name": "Countdown",
+      "url": "./",
+      "icons": [{ "src": "icon.svg", "sizes": "any" }]
+    }
+  ],
+  "screenshots": []
+}
