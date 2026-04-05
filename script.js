@@ -26,8 +26,8 @@
 const SONGS = [
     { name: 'Luces Navideñas', file: 'luces_navideñas.mp3',  icon: '🕯️' },
     { name: 'Jingle Bells',    file: 'jingle_bells.mp3',      icon: '🔔' },
-    { name: 'Noche de Paz',    file: 'noche_de_paz.mp3',      icon: '⭐' },
-    { name: 'Feliz Navidad',   file: 'feliz_navidad.mp3',     icon: '🎅' },
+    { name: 'Noche de Paz',    file: 'silent_night.mp3',      icon: '⭐' },
+    { name: 'Feliz Navidad',   file: 'merry_christmas.mp3',     icon: '🎅' },
     { name: 'Deck the Halls',  file: 'deck_the_halls.mp3',    icon: '🎶' },
 ];
 
