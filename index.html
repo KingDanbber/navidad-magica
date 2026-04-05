@@ -4,8 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Navidad Mágica</title>
-
-    <!-- ── PWA Meta Tags ──────────────────────────────────────── -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#00e5ff" id="theme-color-meta">
     <meta name="mobile-web-app-capable" content="yes">
@@ -13,40 +11,27 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Navidad ❄️">
     <link rel="apple-touch-icon" href="icon.svg">
-
-    <!-- ── Open Graph (compartir) ─────────────────────────────── -->
     <meta property="og:title"       content="🎄 Navidad Mágica">
     <meta property="og:description" content="Cuenta regresiva mágica para Navidad con luces y nieve ❄️">
     <meta property="og:url"         content="https://navidad-magica.vercel.app/">
-    <meta property="og:type"        content="website">
-    <meta name="twitter:card"       content="summary">
-
-    <!-- ── Favicon ────────────────────────────────────────────── -->
     <link rel="icon" href="icon.svg" type="image/svg+xml">
-
-    <!-- ── Fonts ──────────────────────────────────────────────── -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;600;800&display=swap"
-          rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<!-- Overlay oscuro sobre el gradiente -->
 <div class="overlay" aria-hidden="true"></div>
-
-<!-- Canvas de nieve — renderizado con requestAnimationFrame, sin DOM spam -->
 <canvas id="snow-canvas" aria-hidden="true"></canvas>
+<!-- Canvas oculto para la tarjeta shareable -->
+<canvas id="share-card-canvas" style="display:none" width="900" height="500" aria-hidden="true"></canvas>
 
-<!-- ═══════════════════════════════════════════════════════════
-     MENSAJE DE LLEGADA — aparece cuando countdown llega a 0
-════════════════════════════════════════════════════════════ -->
+<!-- ═══════ MENSAJE DE LLEGADA ═══════════════════════════════ -->
 <div class="arrival-overlay" id="arrival-overlay" aria-hidden="true"
      role="dialog" aria-modal="true" aria-labelledby="arrival-heading">
     <div class="arrival-content">
-        <div class="confetti-area" id="confetti-canvas-wrap" aria-hidden="true"></div>
+        <div id="confetti-canvas-wrap" aria-hidden="true"></div>
         <span class="arrival-emoji" id="arrival-emoji">🎄</span>
         <h2 class="arrival-title" id="arrival-heading">¡Feliz Navidad!</h2>
         <p class="arrival-subtitle">Que esta noche sea llena de magia, amor y alegría ✨</p>
@@ -54,70 +39,115 @@
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     CONTENEDOR PRINCIPAL
-════════════════════════════════════════════════════════════ -->
+<!-- ═══════ OVERLAY PANTALLA COMPLETA ════════════════════════ -->
+<div id="fullscreen-overlay" class="fullscreen-overlay" hidden aria-modal="true" role="dialog">
+    <button id="fs-exit" class="fs-exit-btn" aria-label="Salir">✕</button>
+    <p class="fs-message" id="fs-message">Falta poco para <span class="fs-xmas" id="fs-xmas-word">Navidad</span></p>
+    <div class="fs-countdown">
+        <div class="fs-box"><span id="fs-days">00</span><p id="fs-label-d">DÍAS</p></div>
+        <div class="fs-sep">:</div>
+        <div class="fs-box"><span id="fs-hours">00</span><p id="fs-label-h">HRS</p></div>
+        <div class="fs-sep">:</div>
+        <div class="fs-box"><span id="fs-minutes">00</span><p id="fs-label-m">MIN</p></div>
+        <div class="fs-sep">:</div>
+        <div class="fs-box"><span id="fs-seconds">00</span><p id="fs-label-s">SEG</p></div>
+    </div>
+    <h1 class="fs-title" id="fs-title">Felices Fiestas</h1>
+    <p class="fs-hint">Toca para salir • Tap to exit</p>
+</div>
+
+<!-- ═══════ MODAL DE ESTADÍSTICAS ════════════════════════════ -->
+<div id="stats-modal" class="stats-modal" hidden role="dialog" aria-modal="true">
+    <div class="stats-content">
+        <button id="stats-close" class="stats-close-btn" aria-label="Cerrar">✕</button>
+        <h3 class="stats-title">📊 <span data-i18n="stats-title">Estadísticas</span></h3>
+        <div class="stats-grid" id="stats-grid"></div>
+        <button id="stats-reset" class="btn-ghost-sm" style="margin-top:12px">
+            🗑️ <span data-i18n="stats-reset">Borrar estadísticas</span>
+        </button>
+    </div>
+</div>
+
+<!-- ═══════ CONTENEDOR PRINCIPAL ════════════════════════════ -->
 <div class="container">
 
-    <!-- Luces navideñas (position:fixed → ancladas al viewport) -->
     <div class="lights" id="lights-container" aria-hidden="true"></div>
-
-    <!-- Título central — visible cuando Power=ON -->
     <h1 id="christmas-title" aria-live="polite">Felices Fiestas</h1>
 
-    <!-- ─────────── PANEL GLASSMORPHISM ─────────── -->
+    <!-- ─────────── PANEL GLASSMORPHISM ────────── -->
     <div class="glass-panel">
 
-        <!-- Temas de color -->
-        <div class="theme-selector" role="group" aria-label="Tema de color">
-            <button class="theme-btn active" data-theme="clasico" title="Clásico">🎄</button>
-            <button class="theme-btn"        data-theme="hielo"   title="Hielo">❄️</button>
-            <button class="theme-btn"        data-theme="dorado"  title="Dorado">⭐</button>
-            <button class="theme-btn"        data-theme="magico"  title="Mágico">🔮</button>
+        <!-- Fila superior: temas + botones de utilidad -->
+        <div class="panel-top-bar">
+            <div class="theme-selector" role="group" aria-label="Tema de color">
+                <button class="theme-btn active" data-theme="clasico" title="Clásico">🎄</button>
+                <button class="theme-btn" data-theme="hielo"   title="Hielo">❄️</button>
+                <button class="theme-btn" data-theme="dorado"  title="Dorado">⭐</button>
+                <button class="theme-btn" data-theme="magico"  title="Mágico">🔮</button>
+            </div>
+            <div class="util-row">
+                <button id="color-picker-toggle" class="util-btn" title="Color de focos">🎨</button>
+                <button id="fullscreen-btn"      class="util-btn" title="Pantalla completa">⛶</button>
+                <button id="stats-btn"           class="util-btn" title="Estadísticas">📊</button>
+            </div>
+        </div>
+
+        <!-- Color Picker compacto (oculto por defecto) -->
+        <div class="cp-panel" id="cp-panel" hidden>
+            <label class="cp-swatch" title="Color A de focos">
+                <span>💡</span>
+                <input type="color" id="light-color-a" value="#ff4444">
+                <span class="cp-swatch-label">A</span>
+            </label>
+            <span class="cp-sep">⟷ Focos ⟷</span>
+            <label class="cp-swatch" title="Color B de focos">
+                <span>💡</span>
+                <input type="color" id="light-color-b" value="#00ff88">
+                <span class="cp-swatch-label">B</span>
+            </label>
+            <button id="color-reset" class="cp-reset" title="Restablecer colores del tema">↺</button>
         </div>
 
         <!-- Countdown -->
         <div id="countdown" aria-label="Cuenta regresiva a Navidad">
-            <div class="time-box"><span id="days">00</span><p>DÍAS</p></div>
+            <div class="time-box"><span id="days">00</span><p id="label-d">DÍAS</p></div>
             <div class="separator" aria-hidden="true">:</div>
-            <div class="time-box"><span id="hours">00</span><p>HRS</p></div>
+            <div class="time-box"><span id="hours">00</span><p id="label-h">HRS</p></div>
             <div class="separator" aria-hidden="true">:</div>
-            <div class="time-box"><span id="minutes">00</span><p>MIN</p></div>
+            <div class="time-box"><span id="minutes">00</span><p id="label-m">MIN</p></div>
             <div class="separator" aria-hidden="true">:</div>
-            <div class="time-box"><span id="seconds">00</span><p>SEG</p></div>
+            <div class="time-box"><span id="seconds">00</span><p id="label-s">SEG</p></div>
         </div>
 
-        <div class="message">
-            Falta poco para <span class="christmas-text">Navidad</span>
-        </div>
+        <!-- Mensaje — reconstruido por JS (sin duplicación) -->
+        <div class="message" id="message-el"></div>
 
-        <!-- ── Selector de canciones ──────────────────────────── -->
-        <div class="song-selector" id="song-selector" role="group" aria-label="Seleccionar canción">
-            <!-- Generado dinámicamente por JS -->
-        </div>
+        <!-- Selector de canciones -->
+        <div class="song-selector" id="song-selector" role="group" aria-label="Seleccionar canción"></div>
 
-        <!-- ── Control de volumen (aparece con Power ON) ─────── -->
+        <!-- Visualizador de audio (canvas, visible con Power ON) -->
+        <canvas id="viz-canvas" class="viz-canvas" height="28" aria-hidden="true"></canvas>
+
+        <!-- Control de volumen -->
         <div class="volume-control" id="volume-control">
-            <span class="vol-icon" aria-hidden="true" id="vol-icon-left">🔈</span>
+            <span class="vol-icon" id="vol-icon-left" aria-hidden="true">🔈</span>
             <input type="range" id="volume-slider" min="0" max="100" value="15"
                    aria-label="Volumen de la música">
             <span class="vol-icon" aria-hidden="true">🔊</span>
         </div>
 
-        <!-- ── Botones principales ────────────────────────────── -->
+        <!-- Botones principales -->
         <div class="controls">
             <button id="on-off-button" class="btn btn-primary" aria-pressed="false">
-                <span class="icon" aria-hidden="true">⭕</span> Power
+                <span class="icon" aria-hidden="true">⭕</span> <span data-i18n="power">Power</span>
             </button>
             <button id="motion-button" class="btn btn-secondary">
-                <span class="icon" aria-hidden="true">✨</span> Modos
+                <span class="icon" aria-hidden="true">✨</span> <span data-i18n="modes">Modos</span>
             </button>
         </div>
 
-        <!-- ── Controles secundarios — grid 3 columnas ──────── -->
+        <!-- Controles secundarios (grid) -->
         <div class="extra-controls">
-
-            <!-- Nieve: toma el espacio disponible, texto no desborda -->
             <button id="snow-button" class="btn-snow" aria-label="Cambiar intensidad de nieve">
                 <span class="snow-btn-icon" aria-hidden="true">🌨️</span>
                 <span class="snow-btn-text">
@@ -125,31 +155,24 @@
                     <span class="snow-level-badge" id="snow-label">Normal</span>
                 </span>
             </button>
-
-            <!-- Compartir: squircle con icono + etiqueta -->
-            <button id="share-button" class="btn-action" aria-label="Compartir página">
+            <button id="share-button" class="btn-action" aria-label="Compartir">
                 <span aria-hidden="true">🔗</span>
                 <small data-i18n="share">Compartir</small>
             </button>
-
-            <!-- Notificación: squircle con icono + etiqueta -->
-            <button id="notify-button" class="btn-action"
-                    aria-label="Activar notificación de Navidad"
-                    title="Notificación el 25 de diciembre">
+            <button id="notify-button" class="btn-action" aria-label="Notificación de Navidad">
                 <span aria-hidden="true">🔔</span>
                 <small data-i18n="notify">Avisar</small>
             </button>
-
         </div>
 
-        <!-- ── Temperatura + idioma ───────────────────────────── -->
+        <!-- Temperatura + idioma -->
         <div class="bottom-bar">
             <div class="weather-widget" id="weather-widget" aria-live="polite">
                 <span class="weather-icon" id="weather-icon" aria-hidden="true">🌡️</span>
                 <span class="weather-temp" id="weather-temp">--°</span>
                 <span class="weather-desc" id="weather-desc" data-i18n="loading">Cargando...</span>
             </div>
-            <button id="lang-toggle" class="lang-btn" aria-label="Cambiar idioma / Switch language">
+            <button id="lang-toggle" class="lang-btn" aria-label="Cambiar idioma">
                 🌐 <span id="lang-label">ES</span>
             </button>
         </div>
@@ -158,10 +181,8 @@
 
 </div><!-- /.container -->
 
-<!-- Toast de feedback (compartir, notificaciones) -->
 <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
-<!-- Audio -->
 <audio id="Audio" preload="auto" loop>
     <source src="luces_navideñas.mp3" type="audio/mpeg">
 </audio>
