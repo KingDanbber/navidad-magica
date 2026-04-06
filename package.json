@@ -1,0 +1,21 @@
+{
+  "name": "navidad-magica",
+  "version": "1.0.0",
+  "description": "Cuenta regresiva mágica para Navidad con luces y nieve",
+  "type": "module",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'Static HTML project - no build needed'",
+    "test": "echo 'No tests configured'"
+  },
+  "keywords": [
+    "christmas",
+    "countdown",
+    "navidad"
+  ],
+  "author": "KingDanbber",
+  "license": "MIT",
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  }
+}
